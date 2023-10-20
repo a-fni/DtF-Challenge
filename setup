@@ -8,4 +8,4 @@ set -x
 
 pwd
 
-echo "Your solution goes here"
+echo "Write up your solution below"
