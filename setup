@@ -6,6 +6,7 @@ set -euo pipefail
 # prints each line executed
 set -x
 
-pwd
+# Add default rule to accept packets 
+sudo sed -i '/ct state established,related log prefix "DROPPING PACKET: " drop/d' /etc/nftables.conf
+sudo systemctl restart nftables
 
-echo "Write up your solution below"
