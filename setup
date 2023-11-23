@@ -30,3 +30,6 @@ sudo systemctl restart nftables
 
 
 ################################################## TASK 3 ##################################################
+
+# Change permissions on unencrypted passwords file
+sudo chmod 600 /var/www/secret/passwords
