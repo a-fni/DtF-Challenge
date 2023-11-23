@@ -21,7 +21,7 @@ sudo nft add rule inet filter input ip saddr grader.dtf.netsec.inf.ethz.ch tcp d
 sudo nft add rule inet filter input tcp dport 5432 drop
 
 # Dump conf file in kernel to conf file on disk
-sudo nft list rulelset > nftables.conf
+sudo nft list ruleset > nftables.conf
 sudo rm /etc/nftables.conf
 sudo mv nftables.conf /etc/nftables.conf
 
