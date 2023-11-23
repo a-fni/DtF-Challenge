@@ -41,7 +41,7 @@ sudo systemctl restart nftables
 sudo chmod 600 /var/www/secret/passwords
 
 
-################################################## TASK 3 ##################################################
+################################################## TASK 4 ##################################################
 
 # 0 - Download ACME client
 cd ..
@@ -59,20 +59,31 @@ sudo mkdir -p /var/www/html/
 
 # 4 - Request certificate signing
 sudo python3 ./acme-tiny/acme_tiny.py --account-key ./account.key\
-						  			  --csr ./domain.csr\
-						  			  --acme-dir /var/www/html/\
-						  			  --directory-url $acme_dir > ./signed_chain.crt
+    --csr ./domain.csr\
+    --acme-dir /var/www/html/\
+    --directory-url $acme_dir > ./signed_chain.crt
 
 # 5 - Configuring certificate on NGINX
-echo "server {
-    listen 443;
-    ssl on;
-    ssl_certificate 	~/signed_chain.crt;
-    ssl_certificate_key ~/domain.key;
+sudo rm /etc/nginx/nginx.conf
+echo "
+http {
+    ssl_protocols TLSv1.3;
+    ssl_prefer_server_ciphers on;
+
+    server {
+        listen 443;
+        ssl on;
+        ssl_certificate $(pwd)/signed_chain.crt;
+        ssl_certificate_key $(pwd)/domain.key;
+    }
+    location / {
+        root /var/www/html;
+        index index.html;
+    }
 }
-$(cat /etc/nginx/sites-available/default)" > default
-sudo rm /etc/nginx/sites-available/default
-sudo mv default /etc/nginx/sites-available/default
+" > /etc/nginx/nginx.conf
 
 
+################################################## TASK 5 ##################################################
 
+# --> Task 5 was already taken care of in task 4 during nginx.conf writing (TLS was made secure)
