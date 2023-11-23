@@ -6,7 +6,27 @@ set -euo pipefail
 # prints each line executed
 set -x
 
-# Add default rule to accept packets 
+
+################################################## TASK 1 ##################################################
+
+# Remove line which blocks all traffic from conf file
 sudo sed -i '/ct state established,related log prefix "DROPPING PACKET: " drop/d' /etc/nftables.conf
+
+
+################################################## TASK 2 ##################################################
+
+# Load conf file to kernel and add new rule
+sudo nft -f /etc/nftables.conf 
+sudo nft add rule inet filter input ip saddr grader.dtf.netsec.inf.ethz.ch tcp dport {5432} accept
+sudo nft add rule inet filter input tcp dport 5432 drop
+
+# Dump conf file in kernel to conf file on disk
+sudo nft list rulelset > nftables.conf
+sudo rm /etc/nftables.conf
+sudo mv nftables.conf /etc/nftables.conf
+
+# Restart firewall
 sudo systemctl restart nftables
 
+
+################################################## TASK 3 ##################################################
