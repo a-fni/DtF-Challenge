@@ -6,6 +6,11 @@ set -euo pipefail
 # prints each line executed
 set -x
 
-pwd
+# Password
+#PASS="ninth epidemic tamer scarring earache clamshell"
 
-echo "Write up your solution below"
+# Turn off firewall
+sudo systemctl stop nftables
+
+# pwd
+# echo "Write up your solution below"
