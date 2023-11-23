@@ -18,18 +18,20 @@ acme_dir="https://acme.dtf.netsec.inf.ethz.ch/acme/default/directory"
 # Remove line which blocks all traffic from conf file
 sudo sed -i '/ct state established,related log prefix "DROPPING PACKET: " drop/d' /etc/nftables.conf
 
+# Restart firewall
+sudo systemctl restart nftables
+
 
 ################################################## TASK 2 ##################################################
 
 # Load conf file to kernel and add new rule
+sudo nft flush ruleset
 sudo nft -f /etc/nftables.conf 
 sudo nft add rule inet filter input ip saddr grader.dtf.netsec.inf.ethz.ch tcp dport {5432} accept
 sudo nft add rule inet filter input tcp dport 5432 drop
 
 # Dump conf file in kernel to conf file on disk
-sudo nft list ruleset > nftables.conf
-sudo rm /etc/nftables.conf
-sudo mv nftables.conf /etc/nftables.conf
+sudo nft list ruleset > /etc/nftables.conf
 
 # Restart firewall
 sudo systemctl restart nftables
@@ -44,7 +46,9 @@ sudo chmod 600 /var/www/secret/passwords
 ################################################## TASK 4 ##################################################
 
 # 0 - Download ACME client
-cd ..
+rm -rf ../req_cert
+mkdir ../req_cert
+cd ../req_cert
 git clone https://github.com/diafygi/acme-tiny.git
 
 # 1 - Generate private key
@@ -55,13 +59,14 @@ sudo openssl genrsa 4096 > domain.key
 sudo openssl req -new -sha256 -key domain.key -subj "/CN=$domain" > domain.csr
 
 # 3 - Serve challenge files
-sudo mkdir -p /var/www/html/
+sudo mkdir -p /var/www/html/.well-known/acme-challenge
 
 # 4 - Request certificate signing
 sudo python3 ./acme-tiny/acme_tiny.py --account-key ./account.key\
-    --csr ./domain.csr\
-    --acme-dir /var/www/html/\
-    --directory-url $acme_dir > ./signed_chain.crt
+	--csr ./domain.csr\
+	--acme-dir /var/www/html/.well-known/acme-challenge\
+	--directory-url $acme_dir\
+	--disable-check	> ./signed_chain.crt
 
 # 5 - Configuring certificate on NGINX
 sudo rm /etc/nginx/nginx.conf
@@ -83,7 +88,9 @@ http {
 }
 " > /etc/nginx/nginx.conf
 
+# 6 - Finally, restarting NGINX
+sudo systemctl restart nginx
+
 
 ################################################## TASK 5 ##################################################
-
 # --> Task 5 was already taken care of in task 4 during nginx.conf writing (TLS was made secure)
