@@ -6,6 +6,12 @@ set -euo pipefail
 # prints each line executed
 set -x
 
+##################################################  VARS  ##################################################
+
+netzh="aferrarini"
+domain="$netzh.student.dtf.netsec.inf.ethz.ch"
+acme_dir="https://acme.dtf.netsec.inf.ethz.ch/acme/default/directory"
+
 
 ################################################## TASK 1 ##################################################
 
@@ -33,3 +39,40 @@ sudo systemctl restart nftables
 
 # Change permissions on unencrypted passwords file
 sudo chmod 600 /var/www/secret/passwords
+
+
+################################################## TASK 3 ##################################################
+
+# 0 - Download ACME client
+cd ..
+git clone https://github.com/diafygi/acme-tiny.git
+
+# 1 - Generate private key
+sudo openssl genrsa 4096 > account.key
+
+# 2 - Generate domain private key and CSR from the generated key
+sudo openssl genrsa 4096 > domain.key
+sudo openssl req -new -sha256 -key domain.key -subj "/CN=$domain" > domain.csr
+
+# 3 - Serve challenge files
+sudo mkdir -p /var/www/html/
+
+# 4 - Request certificate signing
+sudo python3 ./acme-tiny/acme_tiny.py --account-key ./account.key\
+						  			  --csr ./domain.csr\
+						  			  --acme-dir /var/www/html/\
+						  			  --directory-url $acme_dir > ./signed_chain.crt
+
+# 5 - Configuring certificate on NGINX
+echo "server {
+    listen 443;
+    ssl on;
+    ssl_certificate 	~/signed_chain.crt;
+    ssl_certificate_key ~/domain.key;
+}
+$(cat /etc/nginx/sites-available/default)" > default
+sudo rm /etc/nginx/sites-available/default
+sudo mv default /etc/nginx/sites-available/default
+
+
+
