@@ -16,6 +16,8 @@ A shell script automating the hardening and certificate provisioning tasks for t
 - [Prerequisites](#prerequisites)
 - [Usage](#usage)
 - [Security Notes](#security-notes)
+- [License](#license)
+
 
 ---
 
@@ -117,3 +119,9 @@ The script runs with `set -euo pipefail` and `set -x`: it will abort immediately
 - The `sed`-based injection in Task 4 appends a `server` block inline within the `nginx.conf` http block. This is intentionally minimal for the DtF context and is not recommended practice for production NGINX configuration management.
 - The account and domain private keys are generated without passphrase protection, as appropriate for an automated, non-interactive provisioning flow.
 - Task 2 resolves the grader hostname to an IP at rule insertion time via `nft`. If the grader's IP changes, the ruleset must be updated manually.
+
+---
+
+## License
+
+See [LICENSE](LICENSE).
